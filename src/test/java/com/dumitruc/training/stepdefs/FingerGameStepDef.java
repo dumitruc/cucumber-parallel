@@ -1,9 +1,15 @@
 package com.dumitruc.training.stepdefs;
 
+import com.sun.org.apache.xpath.internal.operations.*;
 import cucumber.api.PendingException;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.String;
+import java.lang.management.ManagementFactory;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 
@@ -12,6 +18,7 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
  */
 public class FingerGameStepDef extends StepDefBase {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FingerGameStepDef.class);
     private int FINGERS_ON_ONE_HAND = 5;
 
     @Given("^I hold my hand in a fist$")
@@ -23,19 +30,20 @@ public class FingerGameStepDef extends StepDefBase {
     public void i_show_finger_on_my_left_hand(int arg1, String whichHand) throws Throwable {
         int fingersInFist = cache.getFingersInFist();
         try{
-            int sleepTime = (int)(Math.random()*100);
-            System.out.printf("Sleep time: %s for %s hand on thread: %s\n",sleepTime,whichHand,Thread.currentThread().getId());
+            int sleepTime = (int)(Math.random()*1000);
+            String jvmId = ManagementFactory.getRuntimeMXBean().getName();
+            LOGGER.info(String.format("Sleep time: %s for %s hand on thread: %s on JVM: %s",sleepTime,whichHand,Thread.currentThread().getId(),jvmId));
             Thread.sleep(sleepTime);
             cache.setFingersInFist(fingersInFist - arg1);
         }catch (Exception e){
             System.out.println(e);
         }
-        System.out.printf("Showing %s fingers on my %s hand, %s in my fist\n",arg1,whichHand,cache.getFingersInFist());
+        LOGGER.info(String.format("Showing %s fingers on my %s hand, %s in my fist",arg1,whichHand,cache.getFingersInFist()));
     }
 
     @Then("^I have (\\d+) bent in my fist in my (\\S+) hand$")
     public void i_have_bent_in_my_fist_in_my_left_hand(int arg1, String whichHand) throws Throwable {
-        System.out.printf("I have %s fingers left in my %s hand fist\n",arg1,whichHand);
+        LOGGER.info(String.format("I have hand:%s\texp:%s\tact:%s", whichHand, arg1, cache.getFingersInFist()));
         assertEquals("Incorrect number of fingers left bent", arg1, cache.getFingersInFist());
     }
 
